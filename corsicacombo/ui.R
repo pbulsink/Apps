@@ -39,7 +39,7 @@ shinyUI(navbarPage("Combos", id = "tab", inverse = T,
                             fluidRow(
                               column(2, uiOutput("l2")),
                               column(2, selectInput("lreport", "Report", choices = c("On-Ice", "Off-Ice", "Relative", "Individual", "Context", "Counts"), selected = "On-Ice")),
-                              column(3, sliderInput("ltoi", "TOI Minimum", min = 100, max = 5000, value = 50, step = 50)),
+                              column(3, sliderInput("ltoi", "TOI Minimum", min = 0, max = 5000, value = 50, step = 50)),
                               column(3, uiOutput("lname")),
                               column(2, downloadButton("ldl", "Download File"))
                             ),
@@ -77,7 +77,7 @@ shinyUI(navbarPage("Combos", id = "tab", inverse = T,
                             fluidRow(
                               column(2, uiOutput("p2")),
                               column(2, selectInput("preport", "Report", choices = c("On-Ice", "Off-Ice", "Relative", "Individual", "Context", "Counts"), selected = "On-Ice")),
-                              column(3, sliderInput("ptoi", "TOI Minimum", min = 100, max = 5000, value = 50, step = 50)),
+                              column(3, sliderInput("ptoi", "TOI Minimum", min = 0, max = 5000, value = 50, step = 50)),
                               column(3, uiOutput("pname")),
                               column(2, downloadButton("pdl", "Download File"))
                             ),
