@@ -1,13 +1,14 @@
 # User Interface
 
 # Corsica Team App
-# Last edited 1-17-2016
+# Last edited 1-18-2016
 # Manny
 
 shinyUI(fluidPage(
   tags$head(tags$style(".container-fluid {font-size: 13px; color: #2B547E; background-color: #E8E8E8;}")),
   tags$head(tags$style(".rightAlign{float:right;}")),
   tags$style(type = "text/css", ".shiny-output-error {visibility: hidden;}", ".shiny-output-error:before { visibility: hidden;}"),
+  tags$style(".dataTable thead tr {background-color: #4863A0; color: #ffffff;}"),
   
   # Header text
   fluidRow(

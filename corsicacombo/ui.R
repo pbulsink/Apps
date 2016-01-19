@@ -1,17 +1,21 @@
 # User Interface
 
 # Corsica Combo App
-# Last edited 1-17-2016
+# Last edited 1-18-2016
 # Manny
 
-shinyUI(navbarPage("Combos", id = "tab", inverse = T,
+shinyUI(navbarPage("Combos", id = "tab", inverse = F,
                    
                    tabPanel("Lines", value = "line",
                             
                             tags$head(tags$style(".container-fluid {font-size: 13px; color: #2B547E; background-color: #E8E8E8;}")),
                             tags$head(tags$style(".rightAlign{float:right;}")),
                             tags$style(type = "text/css", ".shiny-output-error {visibility: hidden;}", ".shiny-output-error:before { visibility: hidden;}"),
-                            tags$style(".navbar {background-color: #4863A0;}"),
+                            tags$style(".navbar-default {background-color: #4863A0; border-color: #ffffff;}"),
+                            tags$style(".navbar-default .navbar-nav li a {background-color: #4863A0; color: #ffffff;}"),
+                            tags$style(".navbar-default .navbar-nav .active a {background-color: #ffffff; color: #4863A0;}"),
+                            tags$style(".navbar-default .navbar-brand {background-color: #4863A0; color: #ffffff;}"),
+                            tags$style(".dataTable thead tr {background-color: #4863A0; color: #ffffff;}"),
                             
                             # Header text
                             fluidRow(
