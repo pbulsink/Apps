@@ -1,7 +1,7 @@
 # Server
 
 # Corsica Combo App
-# Last edited 1-17-2016
+# Last edited 1-22-2016
 # Manny
 
 # Load libraries
@@ -11,33 +11,39 @@ library(repmis)
 library(Kmisc)
 library(DT)
 
+# Load data
+require(httr)
 
-shinyServer(function(input, output) {
+response <- GET(url = "https://www.dropbox.com/s/ow3xicdgt2epor6/linetest.Rda?dl=1")
+writeBin(response$content, "lines.Rda")
+load("lines.Rda")
+
+predata <- sumline
+
+shinyServer(function(input, output, session) {
   
   # Load required data
-  data <- reactive({
+  pairdata <- reactive({
     
-    if (input$tab == "line") {
-      require(httr)
-      
-      response <- GET(url = "https://www.dropbox.com/s/ow3xicdgt2epor6/linetest.Rda?dl=1")
-      writeBin(response$content, "lines.Rda")
-      load("lines.Rda")
-      
-      data <- sumline
-    } else if (input$tab == "pair") {
-      require(httr)
-      
       response <- GET(url = "https://www.dropbox.com/s/mnlsx0txbost4gi/pairtest.Rda?dl=1")
       writeBin(response$content, "pairs.Rda")
       load("pairs.Rda")
       
-      data <- sumpair
-    }
-    
-    data
-    
+      sumpair
+      
   })
+    
+    data <- reactive({
+      
+      if (input$tab == "line") {
+        data <- predata
+      } else if (input$tab == "pair") {
+        data <- pairdata()
+      }
+      
+      data
+      
+    })
   
   # Season inputs
   output$l1 <- renderUI(selectInput("l1", "From", choices = sort(unique(data()$Season), decreasing = TRUE), selected = as.character(max(as.numeric(data()$Season)))))

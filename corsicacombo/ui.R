@@ -1,10 +1,10 @@
 # User Interface
 
 # Corsica Combo App
-# Last edited 1-18-2016
+# Last edited 1-22-2016
 # Manny
 
-shinyUI(navbarPage("Combos", id = "tab", inverse = F,
+shinyUI(navbarPage("Combos", id = "tab", inverse = F, windowTitle = "Corsica | Combos",
                    
                    tabPanel("Lines", value = "line",
                             
@@ -49,11 +49,11 @@ shinyUI(navbarPage("Combos", id = "tab", inverse = F,
                             ),
                             
                             # Output
-                            dataTableOutput("t1")
+                            DT::dataTableOutput("t1")
                             
                             ),
                    
-                   tabPanel("Pairs", value = "pair",
+                   tabPanel("Pairings", value = "pair",
                             
                             # Header text
                             fluidRow(
@@ -87,7 +87,7 @@ shinyUI(navbarPage("Combos", id = "tab", inverse = F,
                             ),
                             
                             # Output
-                            dataTableOutput("t2")
+                            DT::dataTableOutput("t2")
                             
                             )
                    

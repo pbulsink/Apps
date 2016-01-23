@@ -1,7 +1,7 @@
 # Server
 
 # Corsica Player App
-# Last edited 1-17-2016
+# Last edited 1-21-2016
 # Manny
 
 # Load libraries
@@ -54,15 +54,13 @@ shinyServer(function(input, output) {
     
     # Score input
     if (input$score == "Any") {
-      scorevector <- c(-3:3)
+      scorevector <- c(-1:1)
     } else if (input$score == "Leading") {
-      scorevector <- c(1:3)
+      scorevector <- 1
     } else if (input$score == "Trailing") {
-      scorevector <- c(-3:-1)
+      scorevector <- -1
     } else if (input$score == "Even") {
       scorevector <- 0
-    } else {
-      scorevector <- as.numeric(input$score)
     }
     
     # Type input
