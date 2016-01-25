@@ -13,7 +13,7 @@ library(DT)
 
 # Load data
 load("lineload.Rda") # Remote
-# load("~/Documents/github/shiny-server/corsicacombo/lineload.Rda") # Local
+#load("~/Documents/github/shiny-server/corsicacombo/lineload.Rda") # Local
 
 predata <- sumline
 
