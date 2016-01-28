@@ -1,7 +1,7 @@
 # User Interface
 
 # Data Downloader App
-# Last edited 1-27-2016
+# Last edited 1-28-2016
 # Manny
 
 shinyUI(fluidPage(
@@ -35,7 +35,7 @@ shinyUI(fluidPage(
   ),
   
   fluidRow(
-    tags$div(class = "separator", style = "width: 100%; height: 500px;")
+    tags$div(class = "separator", style = "width: 100%; height: 300px;")
   )
   
 ))
