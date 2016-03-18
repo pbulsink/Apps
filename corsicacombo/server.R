@@ -1,7 +1,10 @@
+########################################################################################################################################################################################################
+######################## TESTING #######################################################################################################################################################################
+########################################################################################################################################################################################################
 # Server
 
 # Corsica Combo App
-# Last edited 2-28-2016
+# Last edited 3-17-2016
 # Manny
 
 # Load libraries
@@ -18,6 +21,8 @@ con <- dbConnect(SQLite(), link)
 
 seasons <- sqliteQuickColumn(con, "lineseason", "Season")
 names <- sqliteQuickColumn(con, "playerseason", "Player")
+
+dbDisconnect(con)
 
 shinyServer(function(input, output, session) {
   
@@ -905,11 +910,13 @@ shinyServer(function(input, output, session) {
   output$wname <- renderUI(selectizeInput("wname", "Player", choices = unique(as.character(names)), selected = NULL, multiple = TRUE, options = list(maxItems = 1)))
   
   # Teammate input
-  output$tm <- renderUI(
-    conditionalPanel(
-      condition = length(tm.reg()) > 0,
+  output$tm <- renderUI({
+    if(length(input$tm) < 1) {
       selectizeInput("tm", "Teammate(s)", choices = tm.all(), selected = tm.reg(), multiple = TRUE)
-    ))
+    } else {
+      selectizeInput("tm", "Teammate(s)", choices = tm.all(), selected = input$tm, multiple = TRUE)
+    }
+  })
   
   
   # WOWY Query
@@ -1396,7 +1403,7 @@ shinyServer(function(input, output, session) {
     indexvector <- which(colnames(stacked) %in% columnvector)
     
     # Subset columns
-    t3 <- select(stacked, indexvector) %>% data.frame()
+    t3 <- select(stacked, indexvector) %>% filter(TM != input$wname) %>% data.frame()
     colnames(t3) <- gsub("[.]$", "%", colnames(t3))
     
     t3
@@ -1585,5 +1592,206 @@ shinyServer(function(input, output, session) {
     }
     
   })
+  
+  ### TAB: PASSING
+  
+  # Team input
+  output$pteam <- renderUI(selectInput("pteam", "Team", choices = c("ANA", "ARI", "BOS", "BUF", "CAR", "CBJ",
+                                                                    "CGY", "CHI", "COL", "DAL", "DET", "EDM",
+                                                                    "FLA", "L.A", "MIN", "MTL", "N.J", "NSH",
+                                                                    "NYI", "NYR", "OTT", "PHI", "PIT", "S.J",
+                                                                    "STL", "T.B", "TOR", "VAN", "WPG", "WSH",
+                                                                    "PHX", "ATL"), selected = "Any"))
+  # Season inputs
+  output$ps1 <- renderUI(selectInput("ps1", "From", choices = sort(unique(seasons), decreasing = TRUE), selected = as.character(max(as.numeric(seasons)))))
+  output$ps2 <- renderUI(selectInput("ps2", "To", choices = sort(unique(seasons), decreasing = TRUE), selected = as.character(max(as.numeric(seasons)))))
+  
+  # Construct query
+  pass.query <- reactive({
+    
+    # Season input
+    seasonvector <- as.character(seq(from = as.numeric(input$ps1), to = as.numeric(input$ps2), by = 10001))
+    
+    paste("SELECT P1, P2, [Combo.Code], Season, [P1.A1.P2], [P1.A2.P2], [P2.A1.P1], [P2.A2.P1] FROM assistseason WHERE Season IN ('",
+          paste(seasonvector, collapse = "','"),
+          "') AND Team == '",
+          input$pteam,
+          "'",
+          sep = "")
+    
+  })
+  
+  # Load data
+  pass.data <- reactive({
+    
+    query <- pass.query()
+    
+    # Link to database / Connecter a la base de données
+    link1 <- "/srv/shiny-server/fenwicka.sqlite"
+    con1 <- dbConnect(SQLite(), link1)
+    
+    comboquery <- dbSendQuery(con1, query)
+    combo <- fetch(comboquery, -1)
+    
+    dbDisconnect(con1)
+    
+    combo
+    
+  })
+  
+  # Plot contents
+  pass.contents <- reactive({
+    
+    data <- pass.data()
+    
+    ### GROUP BY P1, P2, P3 INSTEAD OF COMBO.CODE ###
+    combo <- group_by(data, P1, P2) %>% 
+      summarise(Combo.Code = first(Combo.Code),
+                P1.A1.P2 = sum(na.omit(P1.A1.P2)), P1.A2.P2 = sum(na.omit(P1.A2.P2)),
+                P2.A1.P1 = sum(na.omit(P2.A1.P1)), P2.A2.P1 = sum(na.omit(P2.A2.P1))) %>%
+      mutate(P1.P2 = P1.A1.P2 + P1.A2.P2, P2.P1 = P2.A1.P1 + P2.A2.P1,
+             PTOT = P1.P2 + P2.P1) %>%
+      arrange(P1, P2) %>%
+      data.frame()
+    
+    combo
+    
+  })
+  
+  # Plot output
+  output$passplot <- renderPlot({
+    
+    require(GGally)
+    require(ggplot2)
+    require(network)
+    require(sna)
+    
+    data <- pass.contents()
+    
+    grid <- cbind(P1 = rep(unique(data$P1), each = length(unique(data$P1))),
+                  P2 = rep(unique(data$P1), times = length(unique(data$P1)))) %>%
+      data.frame() %>%
+      merge(select(data, P1, P2, P1.P2, P1.A1.P2, P1.A2.P2) %>% rename(P1.P2.A = P1.P2, P1.A1.P2.A = P1.A1.P2, P1.A2.P2.A = P1.A2.P2) %>% data.frame(),
+            by.x = c("P1", "P2"), by.y = c("P1", "P2"), all.x = TRUE) %>%
+      data.frame() %>%
+      merge(select(data, P1, P2, P2.P1, P2.A1.P1, P2.A2.P1) %>% rename(P1.P2.B = P2.P1, P1.A1.P2.B = P2.A1.P1, P1.A2.P2.B = P2.A2.P1) %>% data.frame(),
+            by.x = c("P1", "P2"), by.y = c("P2", "P1"), all.x = TRUE) %>%
+      data.frame()
+    
+    grid$P1.P2.A[which(is.na(grid$P1.P2.A) == T)] <- 0; grid$P1.P2.B[which(is.na(grid$P1.P2.B) == T)] <- 0
+    grid$P1.A1.P2.A[which(is.na(grid$P1.A1.P2.A) == T)] <- 0; grid$P1.A1.P2.B[which(is.na(grid$P1.A1.P2.B) == T)] <- 0
+    grid$P1.A2.P2.A[which(is.na(grid$P1.A2.P2.A) == T)] <- 0; grid$P1.A2.P2.B[which(is.na(grid$P1.A2.P2.B) == T)] <- 0
+    grid$P1.P2 <- grid$P1.P2.A + grid$P1.P2.B
+    grid$P1.A1.P2 <- grid$P1.A1.P2.A + grid$P1.A1.P2.B
+    grid$P1.A2.P2 <- grid$P1.A2.P2.A + grid$P1.A2.P2.B
+    
+    if(input$atype == "Any") {
+      assistvector <- grid$P1.P2
+      titlemeasure <- "Assist"
+    } else if(input$atype == "Primary") {
+      assistvector <- grid$P1.A1.P2
+      titlemeasure <- "Primary Assist"
+    } else if(input$atype == "Secondary") {
+      assistvector <- grid$P1.A2.P2
+      titlemeasure <- "Secondary Assist"
+    }
+    
+    mat <- matrix(assistvector, nrow = length(unique(data$P1)), byrow = T) %>% data.frame(row.names = unique(data$P1))
+    colnames(mat) <- unique(data$P1)
+    
+    net <- network(mat,
+                   matrix.type = "bipartite",
+                   names.eval = "weights",
+                   ignore.eval = FALSE)
+    
+    set.edge.attribute(net, "size", (net %e% "weights")/2)
+    
+    p <- try(
+      ggnet2(net,
+             label = F,
+             color = "mode",
+             size = "degree",
+             size.min = 1, # Try different limits
+             palette = c("actor" = "dodgerblue", "event" = "red1"),
+             node.alpha = 0.5,
+             edge.size = "size",
+             edge.alpha = 0.3
+      ) +
+        geom_text(aes(label = label), family = "metrophobic", fontface = "bold", size = 2.5) +
+        guides(size = FALSE) +
+        labs(title = paste(input$pteam,
+                           paste(substr(input$ps1, start = 1, stop = 4), substr(input$ps2, start = 5, stop = 8), sep = "-"),
+                           titlemeasure,
+                           "Network")
+        ) +
+        theme(
+          panel.background = element_rect(fill = "#EFEFEF"),
+          panel.grid.minor = element_blank(),
+          plot.background = element_rect(color = "#4863A0", size = 2)
+        )
+    )
+    
+    if(class(p) == "try-error") {
+      
+      p <- try(
+        ggnet2(net,
+               label = F,
+               color = "mode",
+               size = "degree",
+               size.min = 2, # Try different limits
+               palette = c("actor" = "dodgerblue", "event" = "red1"),
+               node.alpha = 0.5,
+               edge.size = "size",
+               edge.alpha = 0.3
+        ) +
+          geom_text(aes(label = label), family = "metrophobic", fontface = "bold", size = 2.5) +
+          guides(size = FALSE) +
+          labs(title = paste(input$pteam,
+                             paste(substr(input$ps1, start = 1, stop = 4), substr(input$ps2, start = 5, stop = 8), sep = "-"),
+                             titlemeasure,
+                             "Network")
+          ) +
+          theme(
+            panel.background = element_rect(fill = "#EFEFEF"),
+            panel.grid.minor = element_blank(),
+            plot.background = element_rect(color = "#4863A0", size = 2)
+          )
+      )
+      
+    }
+    
+    if(class(p) == "try-error") {
+      
+      p <- try(
+        ggnet2(net,
+               label = F,
+               color = "mode",
+               size = "degree",
+               size.min = 3, # Try different limits
+               palette = c("actor" = "dodgerblue", "event" = "red1"),
+               node.alpha = 0.5,
+               edge.size = "size",
+               edge.alpha = 0.3
+        ) +
+          geom_text(aes(label = label), family = "metrophobic", fontface = "bold", size = 2.5) +
+          guides(size = FALSE) +
+          labs(title = paste(input$pteam,
+                             paste(substr(input$ps1, start = 1, stop = 4), substr(input$ps2, start = 5, stop = 8), sep = "-"),
+                             titlemeasure,
+                             "Network")
+          ) +
+          theme(
+            panel.background = element_rect(fill = "#EFEFEF"),
+            panel.grid.minor = element_blank(),
+            plot.background = element_rect(color = "#4863A0", size = 2)
+          )
+      )
+      
+    }
+    
+    print(p)
+    
+  })
+  
   
 })

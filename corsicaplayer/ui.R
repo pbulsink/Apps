@@ -1,7 +1,10 @@
+########################################################################################################################################################################################################
+######################## TESTING #######################################################################################################################################################################
+########################################################################################################################################################################################################
 # User Interface
 
 # Corsica Player App
-# Last edited 2-28-2016
+# Last edited 3-5-2016
 # Manny
 
 require(shinydashboard)
@@ -95,7 +98,7 @@ shinyUI(navbarPage("Skaters", id = "tab", inverse = F, windowTitle = "Corsica | 
                                 
                                 # Input row 1
                                 fluidRow(
-                                  column(4, dateRangeInput("date", "Date Range", min = "2007-10-01", max = Sys.Date(), start = "2015-10-01", end = Sys.Date(), format = "yyyy-mm-dd")),
+                                  column(4, dateRangeInput("date", "Date Range", min = "2007-10-01", max = NULL, start = "2015-10-01", end = NULL, format = "yyyy-mm-dd")),
                                   column(2, selectInput("qstrength", "Strength State", choices = c("All", "5v5", "5v4", "4v5", "4v4", "5v3", "3v5", "3v3"), selected = "5v5")),
                                   column(2, selectInput("qscore", "Score State", choices = c("Any", "Leading", "Trailing", "Even"), selected = "Any")),
                                   column(2, selectInput("qvenue", "Venue", choices = c("Any", "Home", "Away"), selected = "Any"))
@@ -145,7 +148,7 @@ shinyUI(navbarPage("Skaters", id = "tab", inverse = F, windowTitle = "Corsica | 
                                 
                                 # Input row 1
                                 fluidRow(
-                                  column(4, dateRangeInput("s1date", "Date Range", min = "2007-10-01", max = Sys.Date(), start = "2015-10-01", end = Sys.Date(), format = "yyyy-mm-dd")),
+                                  column(4, dateRangeInput("s1date", "Date Range", min = "2007-10-01", max = NULL, start = "2015-10-01", end = NULL, format = "yyyy-mm-dd")),
                                   column(3, uiOutput("s1name")),
                                   column(2, selectInput("s1strength", "Strength State", choices = c("All", "5v5", "5v4", "4v5", "4v4", "5v3", "3v5", "3v3"), selected = "5v5")),
                                   column(2, selectInput("s1measure", "Measure", choices = c("CF%", "FF%", "SF%", "GF%", "xGF%",

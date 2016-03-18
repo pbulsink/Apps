@@ -1,7 +1,10 @@
+########################################################################################################################################################################################################
+######################## TESTING #######################################################################################################################################################################
+########################################################################################################################################################################################################
 # User Interface
 
 # Corsica Combo App
-# Last edited 2-28-2016
+# Last edited 3-16-2016
 # Manny
 
 require(shinydashboard)
@@ -167,7 +170,35 @@ shinyUI(navbarPage("Combos", id = "tab", inverse = F, windowTitle = "Corsica | C
                               dashboardSidebar(disable = TRUE),
                               dashboardBody(
                                 
-                                tags$div(class = "soon", style = "text-align: center; padding: 250px 0 275px 0;", tags$h2("Coming soon..."))
+                                # Header text
+                                fluidRow(
+                                  column(6, h2("Assist Networks")),
+                                  column(6, tags$div(class = "rightAlign", checked = NA, tags$a(href = "http://www.corsica.hockey/", target = "_parent", tags$h2("Corsica ↩", style = "color: #2B547E;"))))
+                                ),
+                                
+                                # Help text
+                                fluidRow(
+                                  column(6, helpText("")),
+                                  column(6, tags$div(class = "rightAlign", helpText("Confused? Consult the", tags$a(href = "http://www.corsica.hockey/blog/2016/02/03/glossary/", "Glossary"))))
+                                ),
+                                
+                                # Input row 1
+                                fluidRow(
+                                  column(3, uiOutput("ps1")),
+                                  column(3, uiOutput("ps2")),
+                                  column(3, uiOutput("pteam")),
+                                  column(3, selectInput("atype", "Assist Type", choices = c("Any", "Primary", "Secondary"), selected = "Any"))
+                                ),
+                                
+                                fluidRow(
+                                  box(
+                                    plotOutput("passplot"),
+                                    width = 12,
+                                    title = "Assist Network",
+                                    solidHeader = TRUE,
+                                    collapsible = TRUE
+                                  )
+                                )
                                 
                               )
                               
